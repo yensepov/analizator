@@ -1,0 +1,25 @@
+import pandas as pd
+from tabula import read_pdf
+from tabulate import tabulate
+
+
+initl_file = read_pdf('kaspi 6m.pdf', pages='all')
+all_pages_of_file = len(initl_file)
+table_num = range(3, all_pages_of_file)
+
+df = initl_file[2]
+
+for table in table_num:
+    cur_table = pd.DataFrame(initl_file[table])
+    columns = cur_table.columns.tolist()
+    new_column_names = ['Дата', 'Сумма', 'Операция', 'Детали']
+    cur_table.columns = new_column_names
+    new_row = pd.DataFrame({new_column_names[0]: columns[0], new_column_names[1]: columns[1], new_column_names[2]: columns[2], new_column_names[3]: columns[3]}, index=[0])
+    table_df = pd.concat([new_row, cur_table.loc[:]]).reset_index(drop=True)
+    df = pd.concat([df, table_df]).reset_index(drop=True)
+
+df['Дата'] = pd.to_datetime(df['Дата'], format='%d.%m.%y')
+
+dec_df = df.loc[(df['Дата'] >= '01.12.23') & (df['Дата'] < '01.01.24')]
+
+print(df)
